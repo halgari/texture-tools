@@ -37,6 +37,8 @@ public class UnitTest1
         recompressed.Write(testFile);
         testFile.Position = 0;
 
+        var plan = await Plan.Load(testFile);
+
     }
 
 

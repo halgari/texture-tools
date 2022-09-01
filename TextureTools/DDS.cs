@@ -7,6 +7,8 @@ namespace TextureTools;
 
 public struct DDS_HEADER
 {
+    public const int DDS_MAGIC = 0x20534444;
+    
     // ReSharper disable once InconsistentNaming
     public uint dwSize;
     public uint dwHeaderFlags;
@@ -26,6 +28,42 @@ public struct DDS_HEADER
         // 9 uint + DDS_PIXELFORMAT uints + 2 uint arrays with 14 uints total
         // each uint 4 bytes each
         return 9 * 4 + PixelFormat.GetSize() + 14 * 4;
+    }
+    
+    
+    public static void Read(BinaryReader br, ref DDS_HEADER header)
+    {
+        var read = br.ReadUInt32();
+        if (read != DDS_MAGIC)
+            throw new Exception("Invalid DDS File");
+        
+        header.dwSize = br.ReadUInt32();
+        header.dwHeaderFlags = br.ReadUInt32();
+        header.dwHeight = br.ReadUInt32();
+        header.dwWidth = br.ReadUInt32();
+        header.dwPitchOrLinearSize = br.ReadUInt32();
+        header.dwDepth = br.ReadUInt32();
+        header.dwMipMapCount = br.ReadUInt32();
+        
+        // dwReserved
+        for (var i = 0; i < 11; i++)
+            br.ReadUInt32();
+
+        header.PixelFormat = new DDS_PIXELFORMAT();
+        header.PixelFormat.dwSize = br.ReadUInt32();
+        header.PixelFormat.dwFlags = br.ReadUInt32();
+        header.PixelFormat.dwFourCC = br.ReadUInt32();
+        header.PixelFormat.dwRGBBitCount = br.ReadUInt32();
+        header.PixelFormat.dwRBitMask = br.ReadUInt32();
+        header.PixelFormat.dwGBitMask = br.ReadUInt32();
+        header.PixelFormat.dwBBitMask = br.ReadUInt32();
+        header.PixelFormat.dwABitMask = br.ReadUInt32();
+        header.dwSurfaceFlags = br.ReadUInt32();
+        header.dwCubemapFlags = br.ReadUInt32();
+        
+        // dwReserved2
+        for (var i = 0; i < 3; i++)
+            br.ReadUInt32();
     }
 
     public void Write(BinaryWriter bw)
